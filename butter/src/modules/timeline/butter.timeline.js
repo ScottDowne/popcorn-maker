@@ -420,7 +420,7 @@
     var currentZoom = 1;
     this.zoom = function( detail ) {
 
-      if ( detail < 0 && currentZoom < 6 ) {
+      if ( detail < 0 && currentZoom < 12 ) {
 
         currentZoom++;
       } else if ( detail > 0 && currentZoom > 1 ) {

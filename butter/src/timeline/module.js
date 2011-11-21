@@ -97,6 +97,11 @@ THE SOFTWARE.
           this.dispatch( "trackeventupdated", butter.targettedEvent );
         }
       };
+      
+      this.targetEvent = function( trackEvent ) {
+      
+        butter.targettedEvent = trackEvent;
+      };
 
       // Convert an SMPTE timestamp to seconds
       this.smpteToSeconds = function( smpte ) {
@@ -212,6 +217,7 @@ THE SOFTWARE.
           currentMediaInstance.butterTracks[ track.id() ].newPos = index;
           butter.dispatch( "trackmoved", currentMediaInstance.butterTracks[ track.id() ] );
         },
+        // creates a new track event
         setup: function( track, trackEventObj, event, ui ) {
 
           // setup for data-trackliner-type
@@ -248,6 +254,12 @@ THE SOFTWARE.
             return { left: left, innerHTML: trackEventObj.type, classes: [ "track-event", "butter-track-event", trackEventObj.type ], width: width };
           }
         },
+        // called after a new track event is created
+        created: function( track, trackEventObj, event, ui ) {
+
+          butter.timeline.targetEvent( trackEventObj.options );
+          trackEventObj.select();
+        },
         // called when an existing track is moved
         moved: function( track, trackEventObj, event, ui ) {
 
@@ -276,7 +288,9 @@ THE SOFTWARE.
         },
         // called when a track event is clicked
         click: function ( track, trackEventObj, event, ui ) {
-          butter.targettedEvent = trackEventObj.options;
+
+          trackEventObj.select();
+          butter.timeline.targetEvent( trackEventObj.options );
         },
 
         // called when a track event is double clicked
@@ -285,6 +299,15 @@ THE SOFTWARE.
           if ( butter.eventeditor ) {
             butter.eventeditor.editTrackEvent( trackEventObj.options );
           }
+        },
+        select: function (track, trackEventObj, event) {
+
+          console.log( "selected" );
+          $(trackEventObj.element).addClass('trackliner-event-selected');
+        },
+        deselect: function (track, trackEventObj, event) {
+
+          $(trackEventObj.element).removeClass('trackliner-event-selected');
         }
       });
       
@@ -327,6 +350,7 @@ THE SOFTWARE.
           return;
         }
 
+        butter.timeline.targetEvent( trackEvent );
         var trackLinerTrackEvent = currentMediaInstance.trackLinerTracks[ trackEvent.track.id ].createTrackEvent( "butterapp", trackEvent );
         currentMediaInstance.trackLinerTrackEvents[ trackEvent.id ] = trackLinerTrackEvent;
         currentMediaInstance.butterTrackEvents[ trackLinerTrackEvent.element.id ]
@@ -339,8 +363,6 @@ THE SOFTWARE.
         }
 
         addTrackEvent( event.data );
-        butter.targettedEvent = event.data;
-
       });
 
       butter.listen( "trackeventremoved", function( event ) {
